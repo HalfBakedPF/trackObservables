@@ -176,6 +176,7 @@ std::vector<float> j_mass_prun;
 std::vector<float> j_mass_sdb2;
 std::vector<float> j_mass_sdm1;
 std::vector<float> j_multiplicity;
+std::vector<float> event_weights;
 
 // 211, -211: PI+, PI-
 // 3122, -3122: Lambda 
@@ -344,6 +345,10 @@ int main (int argc, char **argv) {
 	  	if(abs((*p)->status())==1) particles.push_back( curpar );
 	  }
       	}
+        if (tag.find("PDF")!=std::string::npos) {
+          for ( HepMC::WeightContainer::const_iterator p = evt->weights().begin(); p != evt->weights().end(); ++p )
+            event_weights.push_back(*p);
+        }
       }
       if (numberOfPileup>0) {
 	if (!mixer->next_event()) { // when running out of PU events start from the beginning
@@ -534,6 +539,7 @@ void declareBranches( TTree* t ){
     t->Branch("j_mass_sdb2"      , &j_mass_sdb2      );
     t->Branch("j_mass_sdm1"      , &j_mass_sdm1      );
     t->Branch("j_multiplicity"   , &j_multiplicity   );
+    t->Branch("event_weights"    , &event_weights   );
 
 }
 
@@ -610,6 +616,7 @@ void clearVectors(){
     j_mass_sdb2.clear();
     j_mass_sdm1.clear();
     j_multiplicity.clear();
+    event_weights.clear();
 }
 
 // ----------------------------------------------------------------------------------
