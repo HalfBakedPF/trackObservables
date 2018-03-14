@@ -29,7 +29,7 @@
 #include "fastjet/contrib/ModifiedMassDropTagger.hh"
 #include "fastjet/contrib/SoftDrop.hh"
 #include "fastjet/contrib/DistanceMeasure.hh"
-#include "RecursiveSoftDrop.hh"
+#include "fastjet/contrib/RecursiveSoftDrop.hh"
 
 #include "EnergyCorrelations.hh"
 #include "CmdLine.hh"
@@ -171,8 +171,9 @@ std::vector<float> j_m3_b2_mmdt;
 std::vector<float> j_qjetVol;
 std::vector<float> j_mass_trim;
 std::vector<float> j_mass_mmdt;
-std::vector<float> j_mass_rsd;
+std::vector<float> j_mass_rsdb1;
 std::vector<float> j_mass_prun;
+std::vector<float> j_mass_sdb1;
 std::vector<float> j_mass_sdb2;
 std::vector<float> j_mass_sdm1;
 std::vector<float> j_multiplicity;
@@ -251,7 +252,8 @@ int main (int argc, char **argv) {
     declareBranches(t_tracks);
     declareBranches(t_tragam);
     declareBranches(t_allpar);
-
+    std::cout << "outName = " << outName << std::endl;
+    
     static Double_t numberOfPileup=findOption("p",tag);
   
     std::vector<string> pufiles;
@@ -534,8 +536,9 @@ void declareBranches( TTree* t ){
 
     t->Branch("j_mass_trim"      , &j_mass_trim      );
     t->Branch("j_mass_mmdt"      , &j_mass_mmdt      );
-    t->Branch("j_mass_rsd"       , &j_mass_rsd      );
+    t->Branch("j_mass_rsdb1"     , &j_mass_rsdb1     );
     t->Branch("j_mass_prun"      , &j_mass_prun      );
+    t->Branch("j_mass_sdb1"      , &j_mass_sdb1      );
     t->Branch("j_mass_sdb2"      , &j_mass_sdb2      );
     t->Branch("j_mass_sdm1"      , &j_mass_sdm1      );
     t->Branch("j_multiplicity"   , &j_multiplicity   );
@@ -611,8 +614,9 @@ void clearVectors(){
     j_qjetVol.clear();
     j_mass_trim.clear();
     j_mass_mmdt.clear();
-    j_mass_rsd.clear();
+    j_mass_rsdb1.clear();
     j_mass_prun.clear();
+    j_mass_sdb1.clear();
     j_mass_sdb2.clear();
     j_mass_sdm1.clear();
     j_multiplicity.clear();
@@ -696,9 +700,10 @@ void PushBackJetInformation(fastjet::PseudoJet jet, int particleContentFlag, std
     double zcut_sd = 0.1;
     double mu_sd   = 1.0;
     fastjet::contrib::SoftDrop soft_drop_mmdt(0.0, zcut_sd, mu_sd);
+    fastjet::contrib::SoftDrop soft_drop_sdb1(1.0, zcut_sd, mu_sd);
     fastjet::contrib::SoftDrop soft_drop_sdb2(2.0, zcut_sd, mu_sd);
     fastjet::contrib::SoftDrop soft_drop_sdm1(-1.0, zcut_sd, mu_sd);
-    fastjet::RecursiveSoftDrop soft_drop_rsd(0.0, zcut_sd, RPARAM);
+    fastjet::contrib::RecursiveSoftDrop soft_drop_rsdb1(1.0, zcut_sd, -1, RPARAM);
     
     // n-subjettiness    
     double beta = 1;      // power for angular dependence, e.g. beta = 1 --> linear k-means, beta = 2 --> quadratic/classic k-means
@@ -794,7 +799,7 @@ void PushBackJetInformation(fastjet::PseudoJet jet, int particleContentFlag, std
 	
         // Groomed variables
         fastjet::PseudoJet mmdtjet=soft_drop_mmdt(curjet);
-        fastjet::PseudoJet rsdjet=soft_drop_rsd(curjet);
+        fastjet::PseudoJet rsdb1jet=soft_drop_rsdb1(curjet);
 
         j_tau1_b1_mmdt.push_back(  nSub1KT_b1(mmdtjet) );        
         j_tau2_b1_mmdt.push_back(  nSub2KT_b1(mmdtjet) );        
@@ -836,7 +841,8 @@ void PushBackJetInformation(fastjet::PseudoJet jet, int particleContentFlag, std
         j_mass_trim.push_back( trimmer1( curjet ).m() );
         j_mass_prun.push_back( pruner1( curjet ).m() );    
         j_mass_mmdt.push_back( mmdtjet.m() );
-        j_mass_rsd.push_back( rsdjet.m() );
+        j_mass_rsdb1.push_back( rsdb1jet.m() );
+        j_mass_sdb1.push_back( soft_drop_sdb1( curjet ).m() );
         j_mass_sdb2.push_back( soft_drop_sdb2( curjet ).m() );
         j_mass_sdm1.push_back( soft_drop_sdm1( curjet ).m() );
         
@@ -909,7 +915,8 @@ void PushBackJetInformation(fastjet::PseudoJet jet, int particleContentFlag, std
         j_mass_trim.push_back( -99 );
         j_mass_prun.push_back( -99 );
         j_mass_mmdt.push_back( -99 );
-        j_mass_rsd.push_back( -99 );
+        j_mass_rsdb1.push_back( -99 );
+        j_mass_sdb1.push_back( -99 );
         j_mass_sdb2.push_back( -99 );
         j_mass_sdm1.push_back( -99 );
         
