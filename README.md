@@ -32,7 +32,6 @@ $ cd ..
 $ svn checkout http://fastjet.hepforge.org/svn/contrib/trunk fjcontrib
 $ cd fjcontrib/
 $ scripts/update-contribs.sh 
-$ scripts/update-contribs.sh EnergyCorrelator 1.2.0-rc1
 $ ./configure --fastjet-config=$PWD/../fastjet-install/bin/fastjet-config
 $ make && make check && make install
 
